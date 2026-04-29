@@ -1,6 +1,6 @@
 import { Center, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Component, Suspense, useEffect, useRef, useState } from "react";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
 
@@ -42,6 +42,30 @@ function ModelLoader() {
       </div>
     </Html>
   );
+}
+
+class SceneErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-full items-center justify-center px-6 text-center text-sm text-indigo-100/80">
+          3D scene failed to initialize on this browser. Your portfolio content is still available
+          while we keep improving compatibility.
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 export default function Hero() {
@@ -100,31 +124,31 @@ export default function Hero() {
       </div>
 
       <div className="h-[300px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-950/80 to-fuchsia-950/40 shadow-2xl shadow-fuchsia-900/20 sm:h-[380px]">
-        <Canvas camera={{ position: [0, 0.25, 3.2], fov: 42 }}>
-          <color attach="background" args={["#0c0a16"]} />
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[2.4, 1.8, 2]} intensity={1.2} color="#7dd3fc" />
-          <pointLight position={[-2, -1, 1]} intensity={20} color="#ec4899" />
+        <SceneErrorBoundary>
+          <Canvas camera={{ position: [0, 0.25, 3.2], fov: 42 }}>
+            <color attach="background" args={["#0c0a16"]} />
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[2.4, 1.8, 2]} intensity={1.2} color="#7dd3fc" />
+            <pointLight position={[-2, -1, 1]} intensity={20} color="#ec4899" />
 
-          <Float speed={1.05} rotationIntensity={0.15} floatIntensity={0.45}>
-            <Suspense fallback={<ModelLoader />}>
-              {modelReady ? <AstronautModel /> : <SpinningShape />}
-            </Suspense>
-          </Float>
+            <Float speed={1.05} rotationIntensity={0.15} floatIntensity={0.45}>
+              <Suspense fallback={<ModelLoader />}>
+                {modelReady ? <AstronautModel /> : <SpinningShape />}
+              </Suspense>
+            </Float>
 
-          <OrbitControls
-            enablePan={false}
-            enableZoom={false}
-            target={[0, -0.2, 0]}
-            minPolarAngle={1.0}
-            maxPolarAngle={2.15}
-            minAzimuthAngle={-0.65}
-            maxAzimuthAngle={0.65}
-          />
-        </Canvas>
+            <OrbitControls
+              enablePan={false}
+              enableZoom={false}
+              target={[0, -0.2, 0]}
+              minPolarAngle={1.0}
+              maxPolarAngle={2.15}
+              minAzimuthAngle={-0.65}
+              maxAzimuthAngle={0.65}
+            />
+          </Canvas>
+        </SceneErrorBoundary>
       </div>
     </section>
   );
 }
-
-useGLTF.preload(MODEL_URL);
