@@ -2,6 +2,8 @@ import { Center, Html, OrbitControls, useGLTF, useProgress } from "@react-three/
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
 
+const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
+
 function SpinningShape() {
   const meshRef = useRef(null);
 
@@ -22,7 +24,7 @@ function SpinningShape() {
 }
 
 function AstronautModel() {
-  const gltf = useGLTF("/models/tenhun_falling_spaceman_fanart.glb");
+  const gltf = useGLTF(MODEL_URL);
   return (
     <Center>
       <primitive object={gltf.scene} scale={1.45} position={[0, -0.9, 0]} />
@@ -50,7 +52,7 @@ export default function Hero() {
 
     async function checkModelAvailability() {
       try {
-        const response = await fetch("/models/tenhun_falling_spaceman_fanart.glb", { method: "HEAD" });
+        const response = await fetch(MODEL_URL, { method: "HEAD" });
         const size = Number(response.headers.get("content-length") ?? 0);
         if (isMounted) {
           setModelReady(response.ok && size > 0);
@@ -125,4 +127,4 @@ export default function Hero() {
   );
 }
 
-useGLTF.preload("/models/tenhun_falling_spaceman_fanart.glb");
+useGLTF.preload(MODEL_URL);
