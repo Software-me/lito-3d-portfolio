@@ -39,7 +39,7 @@ The application combines real-time 3D rendering with a responsive single-page la
 
 ---
 
-## 🧠 Architecture Overview
+##  Architecture Overview
 
 The application follows a modular and scalable structure:
 
@@ -50,7 +50,7 @@ The application follows a modular and scalable structure:
 
 ---
 
-## ⚡ Performance Considerations
+##  Performance Considerations
 
 - Controlled rendering to reduce unnecessary re-renders
 - Optimized 3D assets for web performance
@@ -58,7 +58,7 @@ The application follows a modular and scalable structure:
 
 ---
 
-## 🔄 Future Enhancements
+## Future Enhancements
 
 - Additional 3D interactions and animations
 - Expanded project showcase
@@ -67,14 +67,14 @@ The application follows a modular and scalable structure:
 
 ---
 
-## 💡 Why This Project Matters
+##  Why This Project Matters
 
 This project demonstrates my ability to build modern, interactive web applications that balance performance, usability, and visual design. It reflects my understanding of component-based architecture, real-time rendering, and scalable front-end development.
 
 ---
 
-## 📬 Contact
+##  Contact
 
 **Loreto E. Eclevia**
-📧 leclevia@my365.bellevue.edu
-🔗 https://www.linkedin.com/in/loreto-eclevia-3422872b
+ leclevia@my365.bellevue.edu
+ https://www.linkedin.com/in/loreto-eclevia-3422872b
