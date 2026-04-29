@@ -7,6 +7,10 @@ import { defineConfig } from "vite";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: "/lito-3d-portfolio/",
+  build: {
+    outDir: "docs",
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
