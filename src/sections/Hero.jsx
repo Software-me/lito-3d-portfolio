@@ -1,4 +1,4 @@
-import { Center, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
+import { Center, Float, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Component, Suspense, useEffect, useRef, useState } from "react";
 
