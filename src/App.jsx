@@ -144,6 +144,7 @@ export default function App() {
   const page = document.body.dataset.page ?? "home";
 
   const navItems = [
+    { label: "Home", href: `${base}index.html` },
     { label: "About", href: `${base}about.html` },
     { label: "Project", href: `${base}projects.html` },
     { label: "Contact", href: `${base}contact.html` },
@@ -157,9 +158,21 @@ export default function App() {
   };
 
   const current = pageContent[page] ?? pageContent.home;
+  const pageBackgrounds = {
+    home: "radial-gradient(circle at top right, #1c1140, #07070c 35%)",
+    about: `linear-gradient(rgba(5, 8, 20, 0.78), rgba(5, 8, 20, 0.82)), url("${base}backgrounds/about-bg.jpg")`,
+    projects: `linear-gradient(rgba(7, 8, 20, 0.8), rgba(7, 8, 20, 0.84)), url("${base}backgrounds/projects-bg.png")`,
+    contact: `linear-gradient(rgba(6, 8, 20, 0.82), rgba(6, 8, 20, 0.86)), url("${base}backgrounds/contact-bg.png")`,
+  };
+  const shellStyle = {
+    backgroundImage: pageBackgrounds[page] ?? pageBackgrounds.home,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+  };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#1c1140,#07070c_35%)]">
+    <div className="min-h-screen" style={shellStyle}>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07070c]/85 backdrop-blur-md">
         <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <a href={`${base}index.html`} className="text-lg font-extrabold tracking-wide text-white">
