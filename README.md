@@ -7,7 +7,7 @@ The application combines real-time 3D rendering with a responsive single-page la
 ---
 
 ##  Live Demo
-[Add your deployed link here]
+[https://software-me.github.io/lito-3d-portfolio/](https://software-me.github.io/lito-3d-portfolio/)
 
 ---
 
@@ -36,6 +36,19 @@ The application combines real-time 3D rendering with a responsive single-page la
 - Smooth navigation between sections
 - Modular component structure (About, Projects, Experience, Contact)
 - Optimized performance for interactive rendering
+
+---
+
+##  Featured Projects
+
+### Project 1 - 3D Developer Portfolio
+This project is a modern, interactive 3D developer portfolio built using React, Vite, React Three Fiber, and Tailwind CSS. It features a responsive layout, modular components, and a real-time 3D hero section designed to create an engaging first impression while balancing performance and usability.
+
+### Project 2 - Self-Driving Car Simulation
+This project is an interactive simulation that models basic autonomous driving behavior using JavaScript. It explores environment perception, decision logic, and real-time responses, helping demonstrate core concepts behind intelligent system behavior.
+
+### Project 3 - Student Portfolio Platform
+This project is a data-driven web platform built with HTML, CSS, and JavaScript to showcase academic achievements, events, and media content. It uses structured data rendering to support easier updates and long-term maintainability without changing core page structure.
 
 ---
 

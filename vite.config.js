@@ -10,6 +10,14 @@ export default defineConfig({
   base: "/lito-3d-portfolio/",
   build: {
     outDir: "docs",
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        about: path.resolve(__dirname, "about.html"),
+        projects: path.resolve(__dirname, "projects.html"),
+        contact: path.resolve(__dirname, "contact.html"),
+      },
+    },
   },
   plugins: [react(), tailwindcss()],
   resolve: {

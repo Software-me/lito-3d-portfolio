@@ -70,6 +70,7 @@ class SceneErrorBoundary extends Component {
 
 export default function Hero() {
   const [modelReady, setModelReady] = useState(false);
+  const base = import.meta.env.BASE_URL;
 
   useEffect(() => {
     let isMounted = true;
@@ -98,27 +99,27 @@ export default function Hero() {
     <section className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
       <div>
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-          Interactive 3D hero
+          Frontend Developer - React - 3D Web
         </p>
         <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
-          Step 3 complete: loader and camera framing added.
+          I design and build immersive web experiences.
         </h1>
         <p className="mb-8 max-w-xl text-base leading-relaxed text-indigo-200/75">
-          The hero now has a proper loading indicator and improved framing controls for your model.
-          If the GLB is still empty, it safely falls back to the animated shape.
+          I am Loreto E. Eclevia, a software development graduate focused on responsive interfaces,
+          real-time 3D interaction, and production-ready frontend engineering.
         </p>
         <div className="flex flex-wrap gap-3">
           <a
-            href="#projects"
+            href={`${base}projects.html`}
             className="rounded-full bg-gradient-to-br from-fuchsia-500 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg"
           >
             View Projects
           </a>
           <a
-            href="#about"
+            href={`${base}about.html`}
             className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
           >
-            About me
+            About Me
           </a>
         </div>
       </div>
