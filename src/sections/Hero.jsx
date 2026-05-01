@@ -99,7 +99,7 @@ export default function Hero() {
     <section className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
       <div>
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-          Frontend Developer - React - 3D Web
+          Full-Stack Developer - React - .NET - 3D Web
         </p>
         <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
           I design and build immersive web experiences.
