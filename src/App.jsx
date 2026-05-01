@@ -159,7 +159,7 @@ export default function App() {
 
   const current = pageContent[page] ?? pageContent.home;
   const pageBackgrounds = {
-    home: "radial-gradient(circle at top right, #1c1140, #07070c 35%)",
+    home: `linear-gradient(rgba(6, 8, 20, 0.66), rgba(6, 8, 20, 0.72)), url("${base}backgrounds/about-bg.jpg")`,
     about: `linear-gradient(rgba(5, 8, 20, 0.7), rgba(5, 8, 20, 0.74)), url("${base}backgrounds/about-bg.jpg")`,
     projects: `linear-gradient(rgba(7, 8, 20, 0.72), rgba(7, 8, 20, 0.76)), url("${base}backgrounds/projects-bg.png")`,
     contact: `linear-gradient(rgba(6, 8, 20, 0.74), rgba(6, 8, 20, 0.78)), url("${base}backgrounds/contact-bg.png")`,
