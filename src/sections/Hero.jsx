@@ -304,6 +304,9 @@ export default function Hero({ base, navItems }) {
               >
                 Web Solutions
               </span>
+              <span className="mt-4 block text-sm font-medium tracking-wide text-white/45 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] sm:text-base">
+                More upgrades coming soon.
+              </span>
             </h1>
           </div>
           {/* Right column: empty; astronaut renders in canvas behind */}
