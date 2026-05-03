@@ -7,6 +7,9 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fan
 /** Horizontal placement of the astronaut (world X); lower = closer to headline / Secure block */
 const SCENE_SHIFT_X = 0.62;
 
+/** GLB scale (was 0.88; halved for framing) */
+const MODEL_SCALE = 0.44;
+
 /** Mobile/tablet: fill viewport (dvh); desktop: capped height */
 const HERO_MIN_H =
   "min-h-screen min-h-[100dvh] md:min-h-[min(88svh,780px)] xl:min-h-[min(92svh,920px)]";
@@ -86,7 +89,7 @@ function AstronautModel() {
       <group rotation={[Math.PI, 0, 0]}>
         <group rotation={[0, Math.PI, 0]}>
           <group rotation={[0.12, -0.3, 0.06]}>
-            <primitive object={gltf.scene} scale={0.88} position={[0, -0.72, 0]} />
+            <primitive object={gltf.scene} scale={MODEL_SCALE} position={[0, -0.72, 0]} />
           </group>
         </group>
       </group>
