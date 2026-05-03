@@ -154,7 +154,7 @@ export default function App() {
   /** Home: solid shell only — planet/mountains live once on `Hero` (avoids fixed-bg + rounded clip “double mountain”). */
   const shellStyle =
     page === "home"
-      ? { backgroundColor: "#030412", minHeight: "100vh" }
+      ? { backgroundColor: "#030412" }
       : {
           backgroundImage: pageBackgrounds[page] ?? pageBackgrounds.about,
           backgroundSize: "cover",
@@ -163,7 +163,10 @@ export default function App() {
         };
 
   return (
-    <div className="min-h-screen" style={shellStyle}>
+    <div
+      className="flex min-h-dvh w-full max-w-[100vw] flex-col overflow-x-clip antialiased"
+      style={shellStyle}
+    >
       {page !== "home" ? (
         <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07070c]/85 backdrop-blur-md">
           <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
@@ -191,13 +194,15 @@ export default function App() {
 
       <main
         className={
-          page === "home" ? "w-full px-0 pb-20 pt-0" : "mx-auto max-w-5xl px-4 pb-20 pt-12 sm:px-6"
+          page === "home"
+            ? "w-full min-w-0 flex-1 px-0 pb-16 pt-0 sm:pb-20"
+            : "mx-auto min-w-0 max-w-5xl flex-1 px-4 pb-20 pt-12 sm:px-6"
         }
       >
         {current}
       </main>
 
-      <footer className="border-t border-white/10 py-8 text-center text-xs text-indigo-300/50">
+      <footer className="mt-auto border-t border-white/10 px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-center text-xs text-indigo-300/50">
         Lito Eclevia · Portfolio scaffold
       </footer>
     </div>

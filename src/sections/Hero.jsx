@@ -4,8 +4,12 @@ import { Component, Suspense, useEffect, useRef, useState } from "react";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
 
-/** Shift scene so the figure reads on the right; headline stays on the left overlay */
-const SCENE_SHIFT_X = 1.05;
+/** Horizontal placement of the astronaut (world X); lower = closer to headline / Secure block */
+const SCENE_SHIFT_X = 0.62;
+
+/** Mobile/tablet: fill viewport (dvh); desktop: capped height */
+const HERO_MIN_H =
+  "min-h-screen min-h-[100dvh] md:min-h-[min(88svh,780px)] xl:min-h-[min(92svh,920px)]";
 
 function SpinningShape() {
   const meshRef = useRef(null);
@@ -191,7 +195,8 @@ export default function Hero({ base, navItems }) {
   }, []);
 
   const heroBackdrop = {
-    backgroundImage: `linear-gradient(rgba(8, 4, 18, 0.28), rgba(6, 3, 14, 0.42)), url("${base}backgrounds/projects-bg.png")`,
+    /* Overlay lightened ~two steps so mountains read brighter through the gradient */
+    backgroundImage: `linear-gradient(rgba(8, 4, 18, 0.14), rgba(6, 3, 14, 0.24)), url("${base}backgrounds/projects-bg.png")`,
     backgroundSize: "cover",
     /* Anchor to bottom so more ridgeline / mountain shows under the astronaut (cover crops less from below) */
     backgroundPosition: "center bottom",
@@ -200,13 +205,13 @@ export default function Hero({ base, navItems }) {
 
   return (
     <section
-      className="relative isolate w-full overflow-hidden"
+      className={`relative isolate box-border w-full max-w-[100vw] overflow-x-clip overflow-y-hidden ${HERO_MIN_H}`}
       style={heroBackdrop}
       aria-label="Introduction"
     >
       {/* Hit area: drag to orbit / swivel the figure (below nav) */}
       <div
-        className="absolute inset-x-0 bottom-0 top-20 z-[5] cursor-grab touch-none active:cursor-grabbing sm:top-24 min-h-[min(88svh,920px)]"
+        className={`absolute inset-x-0 bottom-0 top-16 z-[5] cursor-grab touch-none active:cursor-grabbing sm:top-20 md:top-24 ${HERO_MIN_H}`}
         style={{ touchAction: "none" }}
         onPointerDown={onOrbitPointerDown}
         onPointerMove={onOrbitPointerMove}
@@ -217,7 +222,7 @@ export default function Hero({ base, navItems }) {
       />
 
       {/* Full-frame canvas: WebGL clears alpha → page background (planet) shows through everywhere */}
-      <div className="pointer-events-none absolute inset-0 z-0 min-h-[min(88svh,920px)]">
+      <div className={`pointer-events-none absolute inset-0 z-0 ${HERO_MIN_H}`}>
         <div className="absolute inset-0">
           <SceneErrorBoundary>
             <Canvas
@@ -250,20 +255,22 @@ export default function Hero({ base, navItems }) {
 
       {/* Left vignette for legibility — does not create a second “panel”; fades into planet */}
       <div
-        className="pointer-events-none absolute inset-0 z-[1] min-h-[min(88svh,920px)] bg-gradient-to-r from-[#030412]/92 via-[#030412]/45 to-transparent sm:via-[#030412]/35"
+        className={`pointer-events-none absolute inset-0 z-[1] ${HERO_MIN_H} bg-gradient-to-r from-[#030412]/92 via-[#030412]/45 to-transparent sm:via-[#030412]/35`}
         aria-hidden
       />
 
       {/* Nav + copy; pointer-events-none so orbit gestures reach the layer below except on links */}
-      <div className="pointer-events-none relative z-10 flex min-h-[min(88svh,920px)] flex-col px-5 pb-14 pt-6 sm:px-8 sm:pb-16 sm:pt-8 lg:px-12">
-        <nav className="pointer-events-auto relative z-20 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-white/15 pb-5">
+      <div
+        className={`pointer-events-none relative z-10 flex ${HERO_MIN_H} flex-col px-4 pb-[max(3rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6 sm:pb-14 md:px-8 md:pb-16 md:pt-8 lg:px-12`}
+      >
+        <nav className="pointer-events-auto relative z-20 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-white/15 pb-4 sm:gap-x-6 sm:gap-y-3 sm:pb-5">
           <a
             href={`${base}index.html`}
-            className="text-lg font-bold tracking-tight text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]"
+            className="shrink-0 text-base font-bold tracking-tight text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)] sm:text-lg"
           >
             Lito
           </a>
-          <ul className="flex flex-wrap items-center gap-6 sm:gap-8 text-sm font-semibold text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)]">
+          <ul className="flex max-w-[72%] flex-wrap items-center justify-end gap-x-2.5 gap-y-1 text-[0.7rem] font-semibold leading-tight text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)] min-[400px]:max-w-none sm:gap-x-5 sm:text-sm md:gap-8">
             {navItems.map((item) => (
               <li key={item.label}>
                 <a href={item.href} className="transition hover:text-aqua">
@@ -274,20 +281,20 @@ export default function Hero({ base, navItems }) {
           </ul>
         </nav>
 
-        <div className="pointer-events-none grid flex-1 grid-cols-1 items-center gap-10 pt-10 lg:grid-cols-2 lg:gap-8 lg:pt-6">
-          <div className="max-w-xl">
+        <div className="pointer-events-none grid min-h-0 flex-1 grid-cols-1 items-start gap-8 pt-8 sm:items-center sm:gap-10 sm:pt-10 lg:grid-cols-2 lg:gap-8 lg:pt-6">
+          <div className="max-w-full min-w-0 sm:max-w-xl">
             <p className="mb-3 text-sm font-medium tracking-wide text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)] sm:text-base">
               Hi I&apos;m Lito
             </p>
-            <p className="mb-2 text-lg font-medium leading-snug text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.5)] sm:text-xl">
+            <p className="mb-2 text-base font-medium leading-snug text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.5)] sm:text-lg md:text-xl">
               A Developer Dedicated to Crafting
             </p>
-            <h1 className="text-balance font-bold tracking-tight text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.45)]">
-              <span className="hero-secure-swivel block text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">
+            <h1 className="text-balance break-words font-bold tracking-tight text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.45)]">
+              <span className="hero-secure-swivel block text-4xl leading-[0.95] sm:text-6xl lg:text-7xl">
                 <span className="hero-secure-gradient">Secure</span>
               </span>
               <span
-                className="mt-2 block text-3xl font-semibold text-white/35 sm:text-4xl lg:text-5xl"
+                className="mt-2 block text-2xl font-semibold text-white/35 sm:text-3xl md:text-4xl lg:text-5xl"
                 style={{ textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}
               >
                 Web Solutions
