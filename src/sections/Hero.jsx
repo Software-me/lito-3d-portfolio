@@ -30,10 +30,13 @@ function FallingAstronaut({ children, orbitRef }) {
   const groupRef = useRef(null);
   const fallDoneRef = useRef(false);
   const fallRestYRef = useRef(0);
-  /** One-time fall: high → low over a few seconds (no bounce back up) */
+  /** One-time fall: high → rest height above bottom crop (higher yEnd = stops sooner on screen) */
   const fallDuration = 5.2;
   const yStart = 3.35;
-  const yEnd = -0.85;
+  const yEnd = 0.42;
+  /** Gentle bob after the fall so he hovers in frame instead of feeling glued */
+  const floatAmp = 0.11;
+  const floatPeriodSec = 5;
 
   useFrame(({ clock }) => {
     const g = groupRef.current;
@@ -60,7 +63,9 @@ function FallingAstronaut({ children, orbitRef }) {
       return;
     }
 
-    g.position.y = fallRestYRef.current;
+    const hover =
+      floatAmp * Math.sin((2 * Math.PI * t) / floatPeriodSec);
+    g.position.y = fallRestYRef.current + hover;
     g.position.x = 0;
     g.rotation.z = 0.22;
     g.rotation.y = orb.azimuth;
@@ -188,7 +193,8 @@ export default function Hero({ base, navItems }) {
   const heroBackdrop = {
     backgroundImage: `linear-gradient(rgba(8, 4, 18, 0.28), rgba(6, 3, 14, 0.42)), url("${base}backgrounds/projects-bg.png")`,
     backgroundSize: "cover",
-    backgroundPosition: "center",
+    /* Anchor to bottom so more ridgeline / mountain shows under the astronaut (cover crops less from below) */
+    backgroundPosition: "center bottom",
     backgroundRepeat: "no-repeat",
   };
 
@@ -277,7 +283,9 @@ export default function Hero({ base, navItems }) {
               A Developer Dedicated to Crafting
             </p>
             <h1 className="text-balance font-bold tracking-tight text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.45)]">
-              <span className="block text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">Secure</span>
+              <span className="hero-secure-swivel block text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">
+                <span className="hero-secure-gradient">Secure</span>
+              </span>
               <span
                 className="mt-2 block text-3xl font-semibold text-white/35 sm:text-4xl lg:text-5xl"
                 style={{ textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}

@@ -149,3 +149,60 @@ body {
 .field-input-focus {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20;
 }
+
+/* Hero headline “Secure”: gentle swivel + shifting gradient (theme accents) */
+.hero-secure-swivel {
+  transform-origin: center 75%;
+  animation: hero-secure-swivel 8s ease-in-out infinite;
+}
+
+.hero-secure-gradient {
+  display: inline-block;
+  background-image: linear-gradient(
+    110deg,
+    #eef0ff 0%,
+    var(--color-aqua) 18%,
+    var(--color-lavender) 38%,
+    var(--color-coral) 58%,
+    var(--color-mint) 78%,
+    #ffffff 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-secure-colors 14s linear infinite;
+}
+
+@keyframes hero-secure-swivel {
+  0%,
+  100% {
+    transform: perspective(520px) rotateY(-7deg);
+  }
+  50% {
+    transform: perspective(520px) rotateY(7deg);
+  }
+}
+
+@keyframes hero-secure-colors {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-secure-swivel,
+  .hero-secure-gradient {
+    animation: none;
+  }
+
+  .hero-secure-gradient {
+    color: #ffffff;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+  }
+}
