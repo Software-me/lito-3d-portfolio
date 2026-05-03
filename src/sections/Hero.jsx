@@ -5,7 +5,9 @@ import { Component, Suspense, useEffect, useRef, useState } from "react";
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
 
 /** Horizontal placement of the astronaut (world X); lower = closer to headline / Secure block */
-const SCENE_SHIFT_X = 0.62;
+const SCENE_SHIFT_X = 0.18;
+/** Vertical offset of the astronaut group (higher = closer to Secure line on screen) */
+const SCENE_GROUP_Y = 0.14;
 
 /** GLB scale (was 0.88; halved for framing) */
 const MODEL_SCALE = 0.44;
@@ -240,7 +242,7 @@ export default function Hero({ base, navItems }) {
               <directionalLight position={[2.2, 2.1, 2.4]} intensity={1.12} color="#8ae8ff" />
               <pointLight position={[-1.8, -0.8, 1.2]} intensity={16} color="#f472b6" />
 
-              <group position={[SCENE_SHIFT_X, 0.05, 0]}>
+              <group position={[SCENE_SHIFT_X, SCENE_GROUP_Y, 0]}>
                 <Suspense fallback={<ModelLoader />}>
                   {modelReady ? (
                     <FallingAstronaut orbitRef={orbitRef}>
