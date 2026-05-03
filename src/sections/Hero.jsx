@@ -1,8 +1,11 @@
-import { Center, Float, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
+import { Center, Html, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Component, Suspense, useEffect, useRef, useState } from "react";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
+
+/** Shift scene so the figure reads on the right; headline stays on the left overlay */
+const SCENE_SHIFT_X = 1.05;
 
 function SpinningShape() {
   const meshRef = useRef(null);
@@ -23,11 +26,61 @@ function SpinningShape() {
   );
 }
 
+function FallingAstronaut({ children, orbitRef }) {
+  const groupRef = useRef(null);
+  const fallDoneRef = useRef(false);
+  const fallRestYRef = useRef(0);
+  /** One-time fall: high → low over a few seconds (no bounce back up) */
+  const fallDuration = 5.2;
+  const yStart = 3.35;
+  const yEnd = -0.85;
+
+  useFrame(({ clock }) => {
+    const g = groupRef.current;
+    if (!g) {
+      return;
+    }
+    const orb = orbitRef.current;
+    const t = clock.elapsedTime;
+
+    if (!fallDoneRef.current) {
+      const u = Math.min(1, t / fallDuration);
+      const eased = u * u;
+      const fallY = yStart + (yEnd - yStart) * eased;
+      if (u >= 1) {
+        fallDoneRef.current = true;
+        fallRestYRef.current = yEnd;
+      }
+      g.position.y = fallY;
+      g.position.x = 0;
+      const sway = 1 - u;
+      g.rotation.z = Math.sin(t * 2.1) * 0.08 * sway + 0.22;
+      g.rotation.y = Math.sin(t * 0.68) * 0.05 * sway + orb.azimuth;
+      g.rotation.x = Math.sin(t * 0.92) * 0.05 * sway + 0.48 + orb.polar;
+      return;
+    }
+
+    g.position.y = fallRestYRef.current;
+    g.position.x = 0;
+    g.rotation.z = 0.22;
+    g.rotation.y = orb.azimuth;
+    g.rotation.x = 0.48 + orb.polar;
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
 function AstronautModel() {
   const gltf = useGLTF(MODEL_URL);
   return (
     <Center>
-      <primitive object={gltf.scene} scale={1.45} position={[0, -0.9, 0]} />
+      <group rotation={[Math.PI, 0, 0]}>
+        <group rotation={[0, Math.PI, 0]}>
+          <group rotation={[0.12, -0.3, 0.06]}>
+            <primitive object={gltf.scene} scale={0.88} position={[0, -0.72, 0]} />
+          </group>
+        </group>
+      </group>
     </Center>
   );
 }
@@ -57,7 +110,7 @@ class SceneErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex h-full items-center justify-center px-6 text-center text-sm text-indigo-100/80">
+        <div className="flex h-full min-h-[240px] items-center justify-center px-6 text-center text-sm text-indigo-100/80">
           3D scene failed to initialize on this browser. Your portfolio content is still available
           while we keep improving compatibility.
         </div>
@@ -68,9 +121,46 @@ class SceneErrorBoundary extends Component {
   }
 }
 
-export default function Hero() {
+/** Pointer px → radians (orbit / swivel) */
+const ORBIT_SENS = 0.0075;
+/** Pitch limit so drag doesn’t flip through the poles (adjust for more / less tilt) */
+const POLAR_LIMIT = Math.PI / 2 - 0.25;
+
+export default function Hero({ base, navItems }) {
   const [modelReady, setModelReady] = useState(false);
-  const base = import.meta.env.BASE_URL;
+  const orbitRef = useRef({ azimuth: 0, polar: 0 });
+  const draggingRef = useRef(false);
+  const lastPointerRef = useRef({ x: 0, y: 0 });
+
+  const onOrbitPointerDown = (e) => {
+    draggingRef.current = true;
+    lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onOrbitPointerMove = (e) => {
+    if (!draggingRef.current) {
+      return;
+    }
+    const dx = e.clientX - lastPointerRef.current.x;
+    const dy = e.clientY - lastPointerRef.current.y;
+    lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    const orb = orbitRef.current;
+    /* Horizontal → spin around (yaw), full rotations allowed */
+    orb.azimuth -= dx * ORBIT_SENS;
+    /* Vertical → tilt (pitch), clamped */
+    orb.polar -= dy * ORBIT_SENS;
+    orb.polar = Math.max(-POLAR_LIMIT, Math.min(POLAR_LIMIT, orb.polar));
+  };
+
+  const onOrbitPointerUp = (e) => {
+    draggingRef.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* released */
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -95,61 +185,126 @@ export default function Hero() {
     };
   }, []);
 
+  const heroBackdrop = {
+    backgroundImage: `linear-gradient(rgba(8, 4, 18, 0.28), rgba(6, 3, 14, 0.42)), url("${base}backgrounds/projects-bg.png")`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  };
+
   return (
-    <section className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
-      <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-          Full-Stack Developer - React - .NET - 3D Web
-        </p>
-        <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
-          I design and build immersive web experiences.
-        </h1>
-        <p className="mb-8 max-w-xl text-base leading-relaxed text-indigo-200/75">
-          I am Loreto E. Eclevia, a software development graduate focused on responsive interfaces,
-          real-time 3D interaction, and production-ready frontend engineering.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <a
-            href={`${base}projects.html`}
-            className="rounded-full bg-gradient-to-br from-fuchsia-500 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg"
-          >
-            View Projects
-          </a>
-          <a
-            href={`${base}about.html`}
-            className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-          >
-            About Me
-          </a>
+    <section
+      className="relative isolate w-full overflow-hidden"
+      style={heroBackdrop}
+      aria-label="Introduction"
+    >
+      {/* Hit area: drag to orbit / swivel the figure (below nav) */}
+      <div
+        className="absolute inset-x-0 bottom-0 top-20 z-[5] cursor-grab touch-none active:cursor-grabbing sm:top-24 min-h-[min(88svh,920px)]"
+        style={{ touchAction: "none" }}
+        onPointerDown={onOrbitPointerDown}
+        onPointerMove={onOrbitPointerMove}
+        onPointerUp={onOrbitPointerUp}
+        onPointerCancel={onOrbitPointerUp}
+        role="region"
+        aria-label="Drag to rotate and view the astronaut from different angles"
+      />
+
+      {/* Full-frame canvas: WebGL clears alpha → page background (planet) shows through everywhere */}
+      <div className="pointer-events-none absolute inset-0 z-0 min-h-[min(88svh,920px)]">
+        <div className="absolute inset-0">
+          <SceneErrorBoundary>
+            <Canvas
+              className="h-full w-full !bg-transparent"
+              camera={{ position: [SCENE_SHIFT_X, 0.12, 3.85], fov: 42 }}
+              gl={{ alpha: true, antialias: true, premultipliedAlpha: false }}
+              onCreated={({ gl }) => {
+                gl.setClearColor(0x000000, 0);
+              }}
+            >
+              <ambientLight intensity={0.72} />
+              <directionalLight position={[2.2, 2.1, 2.4]} intensity={1.12} color="#8ae8ff" />
+              <pointLight position={[-1.8, -0.8, 1.2]} intensity={16} color="#f472b6" />
+
+              <group position={[SCENE_SHIFT_X, 0.05, 0]}>
+                <Suspense fallback={<ModelLoader />}>
+                  {modelReady ? (
+                    <FallingAstronaut orbitRef={orbitRef}>
+                      <AstronautModel />
+                    </FallingAstronaut>
+                  ) : (
+                    <FloatPlaceholder />
+                  )}
+                </Suspense>
+              </group>
+            </Canvas>
+          </SceneErrorBoundary>
         </div>
       </div>
 
-      <div className="h-[300px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-violet-950/80 to-fuchsia-950/40 shadow-2xl shadow-fuchsia-900/20 sm:h-[380px]">
-        <SceneErrorBoundary>
-          <Canvas camera={{ position: [0, 0.25, 3.2], fov: 42 }}>
-            <color attach="background" args={["#0c0a16"]} />
-            <ambientLight intensity={0.6} />
-            <directionalLight position={[2.4, 1.8, 2]} intensity={1.2} color="#7dd3fc" />
-            <pointLight position={[-2, -1, 1]} intensity={20} color="#ec4899" />
+      {/* Left vignette for legibility — does not create a second “panel”; fades into planet */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] min-h-[min(88svh,920px)] bg-gradient-to-r from-[#030412]/92 via-[#030412]/45 to-transparent sm:via-[#030412]/35"
+        aria-hidden
+      />
 
-            <Float speed={1.05} rotationIntensity={0.15} floatIntensity={0.45}>
-              <Suspense fallback={<ModelLoader />}>
-                {modelReady ? <AstronautModel /> : <SpinningShape />}
-              </Suspense>
-            </Float>
+      {/* Nav + copy; pointer-events-none so orbit gestures reach the layer below except on links */}
+      <div className="pointer-events-none relative z-10 flex min-h-[min(88svh,920px)] flex-col px-5 pb-14 pt-6 sm:px-8 sm:pb-16 sm:pt-8 lg:px-12">
+        <nav className="pointer-events-auto relative z-20 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-white/15 pb-5">
+          <a
+            href={`${base}index.html`}
+            className="text-lg font-bold tracking-tight text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]"
+          >
+            Lito
+          </a>
+          <ul className="flex flex-wrap items-center gap-6 sm:gap-8 text-sm font-semibold text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)]">
+            {navItems.map((item) => (
+              <li key={item.label}>
+                <a href={item.href} className="transition hover:text-aqua">
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-            <OrbitControls
-              enablePan={false}
-              enableZoom={false}
-              target={[0, -0.2, 0]}
-              minPolarAngle={1.0}
-              maxPolarAngle={2.15}
-              minAzimuthAngle={-0.65}
-              maxAzimuthAngle={0.65}
-            />
-          </Canvas>
-        </SceneErrorBoundary>
+        <div className="pointer-events-none grid flex-1 grid-cols-1 items-center gap-10 pt-10 lg:grid-cols-2 lg:gap-8 lg:pt-6">
+          <div className="max-w-xl">
+            <p className="mb-3 text-sm font-medium tracking-wide text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)] sm:text-base">
+              Hi I&apos;m Lito
+            </p>
+            <p className="mb-2 text-lg font-medium leading-snug text-white drop-shadow-[0_1px_12px_rgba(0,0,0,0.5)] sm:text-xl">
+              A Developer Dedicated to Crafting
+            </p>
+            <h1 className="text-balance font-bold tracking-tight text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.45)]">
+              <span className="block text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">Secure</span>
+              <span
+                className="mt-2 block text-3xl font-semibold text-white/35 sm:text-4xl lg:text-5xl"
+                style={{ textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}
+              >
+                Web Solutions
+              </span>
+            </h1>
+          </div>
+          {/* Right column: empty; astronaut renders in canvas behind */}
+          <div className="hidden min-h-[200px] lg:block" aria-hidden />
+        </div>
       </div>
     </section>
+  );
+}
+
+function FloatPlaceholder() {
+  const groupRef = useRef(null);
+  useFrame(({ clock }) => {
+    if (!groupRef.current) {
+      return;
+    }
+    groupRef.current.rotation.y = clock.elapsedTime * 0.4;
+  });
+  return (
+    <group ref={groupRef}>
+      <SpinningShape />
+    </group>
   );
 }

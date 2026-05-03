@@ -9,18 +9,6 @@ function PageWrapper({ title, children }) {
   );
 }
 
-function HomePage() {
-  return (
-    <>
-      <Hero />
-      <PageWrapper title="Welcome">
-        <p className="max-w-2xl text-indigo-200/75">
-          Explore dedicated pages for About, Project, and Contact using the navigation bar.
-        </p>
-      </PageWrapper>
-    </>
-  );
-}
 
 function AboutPage() {
   return (
@@ -146,12 +134,12 @@ export default function App() {
   const navItems = [
     { label: "Home", href: `${base}index.html` },
     { label: "About", href: `${base}about.html` },
-    { label: "Project", href: `${base}projects.html` },
+    { label: "Work", href: `${base}projects.html` },
     { label: "Contact", href: `${base}contact.html` },
   ];
 
   const pageContent = {
-    home: <HomePage />,
+    home: <Hero base={base} navItems={navItems} />,
     about: <AboutPage />,
     projects: <ProjectsPage />,
     contact: <ContactPage />,
@@ -159,44 +147,53 @@ export default function App() {
 
   const current = pageContent[page] ?? pageContent.home;
   const pageBackgrounds = {
-    home: `linear-gradient(rgba(6, 8, 20, 0.66), rgba(6, 8, 20, 0.72)), url("${base}backgrounds/about-bg.jpg")`,
     about: `linear-gradient(rgba(5, 8, 20, 0.7), rgba(5, 8, 20, 0.74)), url("${base}backgrounds/about-bg.jpg")`,
     projects: `linear-gradient(rgba(7, 8, 20, 0.72), rgba(7, 8, 20, 0.76)), url("${base}backgrounds/projects-bg.png")`,
     contact: `linear-gradient(rgba(6, 8, 20, 0.74), rgba(6, 8, 20, 0.78)), url("${base}backgrounds/contact-bg.png")`,
   };
-  const shellStyle = {
-    backgroundImage: pageBackgrounds[page] ?? pageBackgrounds.home,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed",
-  };
+  /** Home: solid shell only — planet/mountains live once on `Hero` (avoids fixed-bg + rounded clip “double mountain”). */
+  const shellStyle =
+    page === "home"
+      ? { backgroundColor: "#030412", minHeight: "100vh" }
+      : {
+          backgroundImage: pageBackgrounds[page] ?? pageBackgrounds.about,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        };
 
   return (
     <div className="min-h-screen" style={shellStyle}>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07070c]/85 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <a href={`${base}index.html`} className="text-lg font-extrabold tracking-wide text-white">
-            Lito Eclevia
-          </a>
-          <ul className="flex flex-wrap items-center gap-6 text-sm font-semibold text-indigo-200/80">
-            {navItems.map((item) => (
-              <li key={item.label}>
-                <a href={item.href} className="transition hover:text-cyan-300">
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a
-            href={`${base}contact.html`}
-            className="rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow-[0_0_18px_rgba(255,47,155,0.45)] transition hover:brightness-110"
-          >
-            Contact
-          </a>
-        </nav>
-      </header>
+      {page !== "home" ? (
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07070c]/85 backdrop-blur-md">
+          <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <a href={`${base}index.html`} className="text-lg font-extrabold tracking-wide text-white">
+              Lito
+            </a>
+            <ul className="flex flex-wrap items-center gap-6 text-sm font-semibold text-indigo-200/80">
+              {navItems.map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="transition hover:text-cyan-300">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a
+              href={`${base}contact.html`}
+              className="rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow-[0_0_18px_rgba(255,47,155,0.45)] transition hover:brightness-110"
+            >
+              Contact
+            </a>
+          </nav>
+        </header>
+      ) : null}
 
-      <main className="mx-auto max-w-5xl px-4 pb-20 pt-12 sm:px-6">
+      <main
+        className={
+          page === "home" ? "w-full px-0 pb-20 pt-0" : "mx-auto max-w-5xl px-4 pb-20 pt-12 sm:px-6"
+        }
+      >
         {current}
       </main>
 
