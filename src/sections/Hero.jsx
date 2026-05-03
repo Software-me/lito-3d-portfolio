@@ -1,11 +1,30 @@
 import { Center, Html, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Component, Suspense, useEffect, useRef, useState } from "react";
+import { Component, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
 
-/** Horizontal placement of the astronaut (world X); lower = closer to headline / Secure block */
-const SCENE_SHIFT_X = 0.62;
+/** Desktop: shift left toward the big planet (lower X = more left in frame) */
+const SCENE_SHIFT_X_DESKTOP = 0.4;
+/** Phones: closer to Secure / Web Solutions (further left in world space) */
+const SCENE_SHIFT_X_MOBILE = -0.28;
+/** Pull camera back on phones so more of the figure fits vertically */
+const CAMERA_Z_DESKTOP = 3.85;
+const CAMERA_Z_MOBILE = 6.25;
+const CAMERA_FOV_DESKTOP = 42;
+const CAMERA_FOV_MOBILE = 62;
+const CAMERA_Y_DESKTOP = 0.12;
+const CAMERA_Y_MOBILE = 0.22;
+/** Smaller than before on all sizes; phone extra small to fit the screen */
+const MODEL_SCALE_DESKTOP = 0.35;
+const MODEL_SCALE_MOBILE = 0.05;
+/** Fall Y range: phones use a shorter, lower-amplitude path so limbs stay in view */
+const FALL_Y_START_DESKTOP = 3.35;
+const FALL_Y_END_DESKTOP = 0.42;
+const FALL_Y_START_MOBILE = 1.15;
+const FALL_Y_END_MOBILE = 0.54;
+const FLOAT_AMP_DESKTOP = 0.11;
+const FLOAT_AMP_MOBILE = 0.06;
 
 /** Mobile/tablet: fill viewport (dvh); desktop: capped height */
 const HERO_MIN_H =
@@ -30,16 +49,12 @@ function SpinningShape() {
   );
 }
 
-function FallingAstronaut({ children, orbitRef }) {
+function FallingAstronaut({ children, orbitRef, fallYStart, fallYEnd, floatAmp }) {
   const groupRef = useRef(null);
   const fallDoneRef = useRef(false);
   const fallRestYRef = useRef(0);
   /** One-time fall: high → rest height above bottom crop (higher yEnd = stops sooner on screen) */
   const fallDuration = 5.2;
-  const yStart = 3.35;
-  const yEnd = 0.42;
-  /** Gentle bob after the fall so he hovers in frame instead of feeling glued */
-  const floatAmp = 0.11;
   const floatPeriodSec = 5;
 
   useFrame(({ clock }) => {
@@ -53,10 +68,10 @@ function FallingAstronaut({ children, orbitRef }) {
     if (!fallDoneRef.current) {
       const u = Math.min(1, t / fallDuration);
       const eased = u * u;
-      const fallY = yStart + (yEnd - yStart) * eased;
+      const fallY = fallYStart + (fallYEnd - fallYStart) * eased;
       if (u >= 1) {
         fallDoneRef.current = true;
-        fallRestYRef.current = yEnd;
+        fallRestYRef.current = fallYEnd;
       }
       g.position.y = fallY;
       g.position.x = 0;
@@ -79,14 +94,14 @@ function FallingAstronaut({ children, orbitRef }) {
   return <group ref={groupRef}>{children}</group>;
 }
 
-function AstronautModel() {
+function AstronautModel({ modelScale = MODEL_SCALE_DESKTOP }) {
   const gltf = useGLTF(MODEL_URL);
   return (
     <Center>
       <group rotation={[Math.PI, 0, 0]}>
         <group rotation={[0, Math.PI, 0]}>
           <group rotation={[0.12, -0.3, 0.06]}>
-            <primitive object={gltf.scene} scale={0.88} position={[0, -0.72, 0]} />
+            <primitive object={gltf.scene} scale={modelScale} position={[0, -0.72, 0]} />
           </group>
         </group>
       </group>
@@ -137,6 +152,14 @@ const POLAR_LIMIT = Math.PI / 2 - 0.25;
 
 export default function Hero({ base, navItems }) {
   const [modelReady, setModelReady] = useState(false);
+  const [sceneShiftX, setSceneShiftX] = useState(SCENE_SHIFT_X_DESKTOP);
+  const [cameraZ, setCameraZ] = useState(CAMERA_Z_DESKTOP);
+  const [cameraFov, setCameraFov] = useState(CAMERA_FOV_DESKTOP);
+  const [modelScale, setModelScale] = useState(MODEL_SCALE_DESKTOP);
+  const [fallYStart, setFallYStart] = useState(FALL_Y_START_DESKTOP);
+  const [fallYEnd, setFallYEnd] = useState(FALL_Y_END_DESKTOP);
+  const [floatAmp, setFloatAmp] = useState(FLOAT_AMP_DESKTOP);
+  const [cameraY, setCameraY] = useState(CAMERA_Y_DESKTOP);
   const orbitRef = useRef({ azimuth: 0, polar: 0 });
   const draggingRef = useRef(false);
   const lastPointerRef = useRef({ x: 0, y: 0 });
@@ -170,6 +193,34 @@ export default function Hero({ base, navItems }) {
       /* released */
     }
   };
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => {
+      if (mq.matches) {
+        setSceneShiftX(SCENE_SHIFT_X_MOBILE);
+        setCameraZ(CAMERA_Z_MOBILE);
+        setCameraFov(CAMERA_FOV_MOBILE);
+        setCameraY(CAMERA_Y_MOBILE);
+        setModelScale(MODEL_SCALE_MOBILE);
+        setFallYStart(FALL_Y_START_MOBILE);
+        setFallYEnd(FALL_Y_END_MOBILE);
+        setFloatAmp(FLOAT_AMP_MOBILE);
+      } else {
+        setSceneShiftX(SCENE_SHIFT_X_DESKTOP);
+        setCameraZ(CAMERA_Z_DESKTOP);
+        setCameraFov(CAMERA_FOV_DESKTOP);
+        setCameraY(CAMERA_Y_DESKTOP);
+        setModelScale(MODEL_SCALE_DESKTOP);
+        setFallYStart(FALL_Y_START_DESKTOP);
+        setFallYEnd(FALL_Y_END_DESKTOP);
+        setFloatAmp(FLOAT_AMP_DESKTOP);
+      }
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -227,7 +278,7 @@ export default function Hero({ base, navItems }) {
           <SceneErrorBoundary>
             <Canvas
               className="h-full w-full !bg-transparent"
-              camera={{ position: [SCENE_SHIFT_X, 0.12, 3.85], fov: 42 }}
+              camera={{ position: [sceneShiftX, cameraY, cameraZ], fov: cameraFov }}
               gl={{ alpha: true, antialias: true, premultipliedAlpha: false }}
               onCreated={({ gl }) => {
                 gl.setClearColor(0x000000, 0);
@@ -237,11 +288,17 @@ export default function Hero({ base, navItems }) {
               <directionalLight position={[2.2, 2.1, 2.4]} intensity={1.12} color="#8ae8ff" />
               <pointLight position={[-1.8, -0.8, 1.2]} intensity={16} color="#f472b6" />
 
-              <group position={[SCENE_SHIFT_X, 0.05, 0]}>
+              <group position={[sceneShiftX, 0.05, 0]}>
                 <Suspense fallback={<ModelLoader />}>
                   {modelReady ? (
-                    <FallingAstronaut orbitRef={orbitRef}>
-                      <AstronautModel />
+                    <FallingAstronaut
+                      key={`${fallYStart}-${fallYEnd}-${modelScale}`}
+                      orbitRef={orbitRef}
+                      fallYStart={fallYStart}
+                      fallYEnd={fallYEnd}
+                      floatAmp={floatAmp}
+                    >
+                      <AstronautModel modelScale={modelScale} />
                     </FallingAstronaut>
                   ) : (
                     <FloatPlaceholder />
